@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+</head>
+
+<body>
+    <div>
+        <h1>Job Tracker Home</h1>
+        <p>Welcome to your job portal</p>
+    </div>
+
+    <div>
+        <div>
+            <h3>Total Aplications</h3>
+            <div>{{total_applications}}</div>
+        </div>
+        <div>
+            <h3>Interviewing</h3>
+            <div>{{interviewing_count}}</div>
+        </div>
+        <div>
+            <h3>
+                Pending reviews
+            </h3>
+            <div>{{pending_reviews}}</div>
+        </div>
+    </div>
+    <h2>Recent Applications</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+            <tr>
+                <strong>
+                    <td>{{job.company}}</td>
+                </strong>
+                <td>{{job.title}}</td>
+                <td>{{job.date}}</td>
+                <td>
+                    <span>
+                        {{job.Status}}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td>No Application Tracked yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+
+</html>

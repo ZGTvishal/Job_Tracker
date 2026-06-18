@@ -2,4 +2,4 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def home_view(request):
-    return HttpResponse("Job Tracker Home")
+    return render(request, 'Applications/home.html')
