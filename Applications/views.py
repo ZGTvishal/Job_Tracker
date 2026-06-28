@@ -66,7 +66,6 @@ def oauth2callback(request):
     gmail_uri = "https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=10"
 
     gmail_response = requests.get(gmail_uri, headers=headers)
-
     if gmail_response.status_code == 200:
         email_list = gmail_response.json()
         message = email_list.get('messages', [])
@@ -74,6 +73,17 @@ def oauth2callback(request):
         msg_url = f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{first_message_id}"
         msg_response = requests.get(msg_url, headers=headers)
         if msg_response.status_code == 200:
-            return JsonResponse(msg_response.json())
+            actual_msg = {}
+            email_body = msg_response.json()
+            actual_msg["gmail_message_id"] = email_body.get('id')
+            actual_msg["snippet"] = email_body.get('snippet')
+            
+            for item in email_body['payload']['headers']:
+                #breakpoint()
+                if item["name"] == 'gmail_message_id' or item["name"] == 'Subject' or item["name"] == 'From' or item["name"] == 'Date' or item["name"] == 'snippet':
+                    actual_msg[item["name"]] = item["value"]
+               # breakpoint()
+
+            return JsonResponse(actual_msg)
     else:
         return HttpResponse("Oops something is not working!")
