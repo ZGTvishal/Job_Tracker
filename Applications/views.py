@@ -1,3 +1,5 @@
+from email.utils import parsedate_to_datetime, parseaddr
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 import urllib.parse
@@ -73,16 +75,40 @@ def oauth2callback(request):
         msg_url = f"https://gmail.googleapis.com/gmail/v1/users/me/messages/{first_message_id}"
         msg_response = requests.get(msg_url, headers=headers)
         if msg_response.status_code == 200:
-            actual_msg = {}
-            email_body = msg_response.json()
-            actual_msg["gmail_message_id"] = email_body.get('id')
-            actual_msg["snippet"] = email_body.get('snippet')
             
-            for item in email_body['payload']['headers']:
-                #breakpoint()
-                if item["name"] == 'gmail_message_id' or item["name"] == 'Subject' or item["name"] == 'From' or item["name"] == 'Date' or item["name"] == 'snippet':
-                    actual_msg[item["name"]] = item["value"]
-               # breakpoint()
+            email_body = msg_response.json()
+            headers = email_body.get('payload', {}).get('headers', [])
+
+            actual_msg = {"gmail_message_id": email_body.get('id'),
+            "gmail_thread_id": email_body.get('threadId'),
+            "sender": "Unknown Sender",  
+            "sender_email" : "No Email",   
+            "subject": "No Subject",
+            "received_date": "Unknown Date",
+            "snippet": email_body.get('snippet'),
+            "processed": False}
+            
+            for item in headers:
+                name = item.get('name')
+                value = item.get('value')
+
+                if name == "From":
+                    # actual_msg["sender"] = value.split("<")[0].strip() if '<' in value else value
+                    # actual_msg['sender_email'] = value.split('<')[-1].strip() if '<' in value else value
+                    raw_from_value = value
+                    real_name, email_add = parseaddr(raw_from_value)
+                    actual_msg['sender'] = real_name
+                    actual_msg['sender_email'] = email_add
+                elif name == 'Subject':
+                    actual_msg["subject"] = value
+                elif name == "Date":
+                    raw_date = value
+                    try:
+                        parsed_dt = parsedate_to_datetime(raw_date)
+                        datetime_dt = timezone.localtime(parsed_dt)
+                        actual_msg["received_date"] = datetime_dt
+                    except(TypeError, ValueError):
+                        actual_msg['received_date'] = timezone.now()
 
             return JsonResponse(actual_msg)
     else:
