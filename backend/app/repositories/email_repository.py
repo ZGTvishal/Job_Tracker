@@ -1,13 +1,13 @@
 class EmailRepository:
 
-    def exists_by_message_id(gmail_message_id):
+    def exists_by_message_id(self, gmail_message_id):
         ...
 
-    def list_by_thread_id(gmail_thread_id):
+    def list_by_thread_id(self, gmail_thread_id) -> list:
         ...
 
-    def get_by_application_id(application_id):
+    def list_by_application_id(self, application_id) -> list:
         ...
 
-    def create(email):
+    def create(self, email):
         ...
